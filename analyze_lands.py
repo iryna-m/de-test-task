@@ -12,6 +12,12 @@ collection = db['land_listings']
 data = list(collection.find())
 df = pd.DataFrame(data)
 
+# Remove the euro symbol and convert to numeric
+df['price'] = df['price'].str.replace('€', '').str.replace(',', '').astype(int)
+
+# Remove the m2 symbol and convert to numeric
+df['size'] = df['size'].str.replace('m2', '').astype(int)
+
 # Calculate price per square meter/acre
 df['price_per_unit'] = df['price'] / df['area']
 
