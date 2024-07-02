@@ -1,3 +1,5 @@
+from typing import re
+
 import pymongo
 import requests
 from bs4 import BeautifulSoup
@@ -47,7 +49,15 @@ def get_land_listings(page):
 def parse_listing(listing):
     try:
         title = listing.find('li', class_='spotlight-list-text').find('strong').text.strip()
-        price = listing.find('h3', class_='listing-price').text.strip()
+        price_element = listing.find('h3', class_='listing-price').text.strip()
+        # Use regular expression to separate currency and price
+        price_match = re.match(r'([€$£])([\d,]+)', price_element)
+        if price_match:
+            currency = price_match.group(1)
+            price = price_match.group(2).replace(',', '')
+        else:
+            currency = 'N/A'
+            price = 'N/A'
         property_id_element = listing.find('li', text=lambda text: text and 'Property ID:' in text)
         property_id = property_id_element.text.split('Property ID:')[1].strip() if property_id_element else 'N/A'
         url = listing.find('a', class_='property-spotlight-image-link')['href']
@@ -74,6 +84,7 @@ def parse_listing(listing):
             'title': title,
             'location': location,
             'price': price,
+            "currency": currency.text.strip() if currency else "N/A",
             'size': size,
             'date': date,
             'url': f'https://www.aresproperties.com.cy{url}'
@@ -94,21 +105,18 @@ def scrape_website():
         for listing in listings:
             data = parse_listing(listing)
             if data:
-                # Check for existing document with the same property_id
-                if collection.find_one({"property_id": data["property_id"]}):
-                    print(f"Duplicate found for property_id: {data['property_id']}. Skipping insertion.")
-                    continue
-
-                print(f"Inserting data: {data}")  # Log the data being inserted
-                result = collection.insert_one(data)
-                print(f"Data inserted with ID: {result.inserted_id}")  # Log the inserted document ID
-
-                # Verify that the data was inserted
-                inserted_data = collection.find_one({"_id": result.inserted_id})
-                if inserted_data:
-                    print(f"Verified insertion: {inserted_data}")
+                existing_record = collection.find_one({"property_id": data["property_id"]})
+                if existing_record:
+                    if existing_record != data:
+                        print(f"Updating record for property_id: {data['property_id']}.")
+                        collection.update_one({"property_id": data["property_id"]}, {"$set": data})
+                        print(f"Record updated for property_id: {data['property_id']}.")
+                    else:
+                        print(f"No changes for property_id: {data['property_id']}. Skipping update.")
                 else:
-                    print(f"Failed to verify insertion for ID: {result.inserted_id}")
+                    print(f"Inserting data: {data}")
+                    collection.insert_one(data)
+                    print(f"Data inserted for property_id: {data['property_id']}")
 
         print(f'Scraped page {page} finished. Data inserted: {len(listings)}')  # Log the number of listings scraped
         page += 1

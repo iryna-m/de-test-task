@@ -47,3 +47,25 @@ mongosh
 ```bash
 mongodump --db real_estate --collection land_listings --out dump/
 ```
+
+
+# Land Data Analysis
+
+## Objective
+This script analyzes land data stored in a MongoDB database and performs the following operations:
+- Calculates the average price per square meter/acre for each location.
+- Identifies the top 5 most expensive locations based on the average price per square meter/acre.
+- Categorizes the land listings into "Cheap", "Moderate", and "Expensive" based on their price per square meter/acre.
+- Generates a bar chart showing the average price per square meter/acre for the top 5 most expensive locations.
+
+## Requirements
+- Python 3.x
+- Pandas
+- Matplotlib
+- Seaborn
+- Pymongo
+
+You can install the required libraries using pip:
+```bash
+pip install pandas matplotlib seaborn pymongo
+```
