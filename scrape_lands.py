@@ -1,5 +1,4 @@
-from typing import re
-
+import re
 import pymongo
 import requests
 from bs4 import BeautifulSoup

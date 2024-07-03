@@ -69,3 +69,21 @@ You can install the required libraries using pip:
 ```bash
 pip install pandas matplotlib seaborn pymongo
 ```
+
+# Auto Scrape Zones
+
+## Overview
+This Python script scrapes zone information and their descriptions from a nested website structure. 
+It collects data from specified URLs and outputs the information in a JSON file.
+
+## Requirements
+- Python 3.x
+- `requests` library
+- `beautifulsoup4` library
+
+## Installation
+Install the required libraries:
+
+```sh
+pip install requests beautifulsoup4
+```
